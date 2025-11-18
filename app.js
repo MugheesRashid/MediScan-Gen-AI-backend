@@ -6,7 +6,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: 'https://medi-care-gen-ai-frontend.vercel.app/',
   credentials: true,
   optionsSuccessStatus: 200
 };
