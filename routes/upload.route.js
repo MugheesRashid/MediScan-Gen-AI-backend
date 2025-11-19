@@ -11,23 +11,24 @@ const router = express.Router();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Gemini model fallback system
+// -------------------------
+// MODEL FALLBACK SYSTEM
+// -------------------------
 async function getBestAvailableModel(genAI) {
-   const MODEL_PRIORITY = [
-   "gemini-2.5-pro",
-   "gemini-2.5-flash",
-   "gemini-2.5-flash-preview",
-   "gemini-2.5-flash-lite",
-   "gemini-2.5-flash-lite-preview",
-   "gemini-2.0-flash",
-   "gemini-2.5-flash-lite",
-
-   ];
+  const MODEL_PRIORITY = [
+    "gemini-2.5-pro",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-preview",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash-lite-preview",
+    "gemini-2.0-flash",
+    "gemini-2.5-flash-lite"
+  ];
 
   for (const modelName of MODEL_PRIORITY) {
     try {
       const model = genAI.getGenerativeModel({ model: modelName });
-      await model.generateContent("ping"); // test call
+      await model.generateContent("ping"); // Test model
       console.log(`✅ Using Gemini model: ${modelName}`);
       return model;
     } catch (err) {
@@ -43,7 +44,45 @@ let model;
   model = await getBestAvailableModel(genAI);
 })();
 
-// Multer storage config
+// -------------------------
+// RETRY + FALLBACK HANDLER
+// -------------------------
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function safeGenerateContent(model, payload, maxRetries = 3) {
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      return await model.generateContent(payload);
+    } catch (err) {
+      const retryable = [429, 500, 503];
+      console.log(`⚠️ Gemini Error (Attempt ${attempt + 1}):`, err.status);
+
+      // Retry if issue is temporary
+      if (retryable.includes(err.status)) {
+        attempt++;
+        await wait(1000 * attempt); // exponential backoff
+        continue;
+      }
+
+      // Non-retryable → throw immediately
+      throw err;
+    }
+  }
+
+  // If all retries fail → switch to next model in queue
+  console.log("🔄 Switching to a new Gemini model after repeated failure...");
+  model = await getBestAvailableModel(genAI);
+
+  return await model.generateContent(payload);
+}
+
+// -------------------------
+// MULTER CONFIG
+// -------------------------
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, "../uploads");
@@ -59,21 +98,26 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// PDF Route
+// -------------------------
+// PDF PROCESSING ROUTE
+// -------------------------
 router.post("/pdf", upload.single("pdf"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file)
+      return res.status(400).json({ error: "No file uploaded" });
 
-    // Always ensure a working model
     if (!model) model = await getBestAvailableModel(genAI);
 
     const pdf = new PDFParse({
-      url: `http://localhost:3000/uploads/${req.file.filename}`,
+      url: `https://medicare-gen-ai-backend.up.railway.app/uploads/${req.file.filename}`,
     });
 
     const extractedText = await pdf.getText();
 
-    const response = await model.generateContent(prompt + extractedText.text);
+    const payload = prompt + extractedText.text;
+
+    const response = await safeGenerateContent(model, payload);
+
     const geminiText = response.response.text();
 
     fs.unlinkSync(req.file.path);
@@ -86,19 +130,70 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
 
   } catch (error) {
     console.error("PDF Error:", error);
-    res.status(500).json({ error: "Processing failed", details: error.message });
+
+    if (req.file?.path) fs.unlinkSync(req.file.path);
+
+    res.status(500).json({
+      error: "Processing failed",
+      details: error.message
+    });
   }
 });
 
-// Image upload
-router.post("/image", upload.single("image"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+// -------------------------
+// IMAGE PROCESSING ROUTE
+// -------------------------
+router.post("/image", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file)
+      return res.status(400).json({ error: "No file uploaded" });
 
-  res.json({
-    success: true,
-    message: "Image uploaded successfully",
-    file: req.file,
-  });
+    if (!model) model = await getBestAvailableModel(genAI);
+     console.log(req.file)
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Image = fileBuffer.toString("base64");
+
+    const payload = {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                data: base64Image,
+                mimeType: req.file.mimetype,
+              },
+            },
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    };
+
+    const response = await safeGenerateContent(model, payload);
+    const geminiText = response.response.text();
+    console.log(geminiText);
+
+    fs.unlinkSync(req.file.path);
+
+    res.json({
+      success: true,
+      message: "Image processed successfully",
+      geminiResponse: geminiText,
+    });
+
+  } catch (error) {
+    console.error("Image Error:", error);
+
+    if (req.file?.path) fs.unlinkSync(req.file.path);
+
+    res.status(500).json({
+      error: "Image processing failed",
+      details: error.message
+    });
+  }
 });
 
 module.exports = router;
