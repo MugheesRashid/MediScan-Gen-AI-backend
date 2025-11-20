@@ -6,7 +6,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: 'https://medicare-genai.vercel.app',
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
   optionsSuccessStatus: 200
 };

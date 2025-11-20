@@ -107,9 +107,8 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
 
     if (!model) model = await getBestAvailableModel(genAI);
-
     const pdf = new PDFParse({
-      url: `https://medicare-gen-ai-backend.up.railway.app/uploads/${req.file.filename}`,
+      url: `https://medicare-genai.vercel.app/uploads/${req.file.filename}`,
     });
 
     const extractedText = await pdf.getText();
@@ -129,7 +128,6 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
     });
 
   } catch (error) {
-    console.error("PDF Error:", error);
 
     if (req.file?.path) fs.unlinkSync(req.file.path);
 
@@ -149,7 +147,6 @@ router.post("/image", upload.single("image"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
 
     if (!model) model = await getBestAvailableModel(genAI);
-     console.log(req.file)
     const fileBuffer = fs.readFileSync(req.file.path);
     const base64Image = fileBuffer.toString("base64");
 
@@ -174,7 +171,6 @@ router.post("/image", upload.single("image"), async (req, res) => {
 
     const response = await safeGenerateContent(model, payload);
     const geminiText = response.response.text();
-    console.log(geminiText);
 
     fs.unlinkSync(req.file.path);
 
