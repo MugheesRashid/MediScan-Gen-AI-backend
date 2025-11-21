@@ -108,7 +108,7 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
 
     if (!model) model = await getBestAvailableModel(genAI);
     const pdf = new PDFParse({
-      url: `https://medicare-genai.vercel.app/uploads/${req.file.filename}`,
+      url: `https://medicare-gen-ai-backend.up.railway.app/uploads/${req.file.filename}`,
     });
 
     const extractedText = await pdf.getText();
@@ -118,6 +118,7 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
     const response = await safeGenerateContent(model, payload);
 
     const geminiText = response.response.text();
+    console.log("Gemini Response:", geminiText);
 
     fs.unlinkSync(req.file.path);
 

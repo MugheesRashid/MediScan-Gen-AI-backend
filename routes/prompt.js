@@ -38,10 +38,10 @@ Here is the JSON structure you MUST output:
     "status": "completed"
   },
   "overallHealth": {
-    "score": "-", (i.e: 85%)
+    "score": "-", (i.e: 85)
     "confidence": "-", (i.e: 79%)
-    "summary": "-",
-    "concerns": ["-"],
+    "summary": "-", (words a non medical person can easily understand)
+    "concerns": ["-"], (mention any health concerns clearly)
     "trends": {
       "previousScore": "-",
       "improvement": "-"
@@ -132,44 +132,17 @@ Here is the JSON structure you MUST output:
     "pancreas": { "status": "-", "score": "-", "description": "-" },
     "blood": { "status": "-", "score": "-", "description": "-" }
   },
-  "risks": [
+  "risks": [  (add multiple risks if needed)
     { 
       "id": 1, 
       "name": "-", 
-      "probability": "-", 
-      "score": "-",
-      "description": "-",
-      "factors": ["-"],
-      "recommendations": ["-"]
-    },
-    { 
-      "id": 2, 
-      "name": "-", 
-      "probability": "-", 
-      "score": "-",
-      "description": "-",
-      "factors": ["-"],
-      "recommendations": ["-"]
-    },
-    { 
-      "id": 3, 
-      "name": "-", 
-      "probability": "-", 
-      "score": "-",
-      "description": "-",
-      "factors": ["-"],
-      "recommendations": ["-"]
-    },
-    { 
-      "id": 4, 
-      "name": "-", 
-      "probability": "-", 
-      "score": "-",
+      "probability": "-", (must be these values only: Low, Low-Moderate, Moderate, High)
+      "score": "-",(out of 100)
       "description": "-",
       "factors": ["-"],
       "recommendations": ["-"]
     }
-  ],
+    ],
   "recommendations": {
     "lifestyle": {
       "dailyRoutine": [
@@ -193,7 +166,7 @@ Here is the JSON structure you MUST output:
     "monitoring": [
       { "test": "-", "frequency": "-", "target": "-" }
     ],
-    medication: [
+    medication: [ (add multiple if needed)
       {
         id: 1,
         name: "Lemon Water",
