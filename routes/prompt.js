@@ -25,7 +25,7 @@ IMPORTANT:
 If the given report text does not contain any extractable medical data, return the JSON with a note that that report is not of medical type and give this json response:
 {
   "status": false
-  "msg": "This is not a medical report",
+  "msg": "This is not a medical report",(you can add any humorous msg here)
 }
 Here is the JSON structure you MUST output:
 

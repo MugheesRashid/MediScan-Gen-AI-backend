@@ -5,11 +5,11 @@ const uploadRoutes = require('./routes/upload.route');
 const app = express();
 
 // CORS configuration
-const corsOptions = {
-  origin: 'https://medicare-genai.vercel.app/',
-  credentials: true,
-  optionsSuccessStatus: 200
-};
+ const corsOptions = {
+   origin: 'https://medicare-genai.vercel.app',
+   credentials: true,
+   optionsSuccessStatus: 200
+ };
 
 // Middleware
 app.use(cors(corsOptions));

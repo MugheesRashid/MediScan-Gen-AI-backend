@@ -106,7 +106,6 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
     if (!req.file)
       return res.status(400).json({ error: "No file uploaded" });
 
-    console.log("Uploaded file:", req.file);
     if (!model) model = await getBestAvailableModel(genAI);
     const pdf = new PDFParse({
       url: `https://medicare-gen-ai-backend.up.railway.app/uploads/${req.file.filename}`,
@@ -129,6 +128,7 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error)
 
     if (req.file?.path) fs.unlinkSync(req.file.path);
 
