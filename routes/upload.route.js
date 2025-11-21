@@ -105,7 +105,6 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
   try {
     if (!req.file)
       return res.status(400).json({ error: "No file uploaded" });
-
     if (!model) model = await getBestAvailableModel(genAI);
     const pdf = new PDFParse({
       url: `https://medicare-gen-ai-backend.up.railway.app/uploads/${req.file.filename}`,
@@ -118,7 +117,6 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
     const response = await safeGenerateContent(model, payload);
 
     const geminiText = response.response.text();
-    console.log("Gemini Response:", geminiText);
 
     fs.unlinkSync(req.file.path);
 
