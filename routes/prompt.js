@@ -21,6 +21,12 @@ In biomarkers.bloodCount, biomarkers.metabolic, biomarkers.lipids, biomarkers.vi
 The organ status value must be one of these healthy, slight, moderate and critical not other value is allowed.
 Return ONLY the JSON — no text before or after.
 
+IMPORTANT:
+If the given report text does not contain any extractable medical data, return the JSON with a note that that report is not of medical type and give this json response:
+{
+  "status": false
+  "msg": "This is not a medical report",
+}
 Here is the JSON structure you MUST output:
 
 {
