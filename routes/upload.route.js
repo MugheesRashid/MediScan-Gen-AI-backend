@@ -96,19 +96,27 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+// add multer limits & fileFilter
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error("Invalid file type"));
+  },
+});
 
 // -------------------------
 // PDF PROCESSING ROUTE
 // -------------------------
 router.post("/pdf", upload.single("pdf"), async (req, res) => {
   try {
-    if (!req.file)
-      return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     if (!model) model = await getBestAvailableModel(genAI);
     const pdf = new PDFParse({
-      url: `https://medicare-gen-ai-backend.up.railway.app/uploads/${req.file.filename}`,
+      url: `${process.env.BACKEND_URL}/uploads/${req.file.filename}`,
     });
 
     const extractedText = await pdf.getText();
@@ -128,7 +136,7 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error)
+    console.error(error)
 
     if (req.file?.path) fs.unlinkSync(req.file.path);
 
