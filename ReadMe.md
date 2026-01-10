@@ -1,6 +1,6 @@
-# 🏥 MediScan Backend — AI-Powered Clinical Insights
+# 🏥 MediScan Backend — AI-Powered Medical Report Reader
 
-> A Node.js backend for medical data ingestion, AI-driven biomarker analysis, and secure clinical insights generation.
+> An intelligent Node.js backend that reads, extracts, and analyzes medical reports using AI and OCR technology. Automatically processes clinical documents (PDFs, images, lab reports) and provides structured health data insights.
 
 **Status:** In Development | **Node.js:** v14+ | **License:** MIT
 
@@ -13,54 +13,70 @@
 - [Tech Stack](#tech-stack)
 - [Repository Structure](#repository-structure)
 - [Setup & Installation](#setup--installation)
-- [Configuration](#configuration--environment)
+- [Environment Configuration](#environment-configuration)
 - [API Endpoints](#api-endpoints)
-- [Data Models](#data-model--contracts)
-- [AI Integration](#ai--model-integration-design--safety)
-- [Biomarker Logic](#biological-interpretation-logic-backend-facing)
-- [Security & Compliance](#security-privacy--compliance)
-- [File Uploads & Parsing](#uploads-and-parsing)
-- [Testing](#testing--validation-backend)
-- [Deployment](#deployment--operations)
-- [Examples](#example-api-usage)
-- [Safety Guidelines](#limitations--clinical-safety)
-- [Future Enhancements](#next-steps--enhancements)
+- [How It Works](#how-it-works)
+- [Document Processing](#document-processing)
+- [AI Integration](#ai-integration)
+- [Data Extraction](#data-extraction)
+- [Security & Privacy](#security--privacy)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Examples](#examples)
+- [Limitations & Safety](#limitations--safety)
+- [Roadmap](#roadmap)
 
 ---
 
 ## Overview
 
-### Purpose
+### What MediScan Does
 
-The backend provides:
-- **Data Ingestion:** Accepts medical lab reports, CSVs, and structured biomarker data
-- **Preprocessing:** Validates, normalizes, and structures health data
-- **AI Orchestration:** Routes data to LLM or inference services for clinical insights
-- **API Endpoints:** RESTful interfaces for client consumption
-- **Analysis Pipeline:** Computes biomarker trends, risk scores, and clinical interpretations
+MediScan Backend is an **intelligent medical report reader** that:
 
-### Audience
+1. **Receives Medical Documents** — Accepts uploaded medical reports, lab results, prescriptions, and clinical documents in PDF, image, or text format
+2. **Extracts Information** — Uses OCR (Optical Character Recognition) and AI to read and understand the medical documents
+3. **Structures Data** — Converts unstructured medical text into standardized, machine-readable JSON format
+4. **Analyzes Content** — Uses AI language models to interpret clinical findings and extract key health metrics
+5. **Provides Insights** — Delivers actionable summaries, flagged abnormal results, and clinical recommendations
 
-Backend engineers, data scientists, DevOps engineers, clinical informaticians
+### Key Value Propositions
 
-### Use Case
+- ⚡ **Fast Document Processing** — Process medical reports in seconds instead of manual review
+- 🎯 **Accurate Data Extraction** — AI-powered extraction of clinical findings, lab values, and recommendations
+- 🔒 **HIPAA-Compliant** — Built with security and privacy as core requirements
+- 🤖 **Intelligent Analysis** — Contextual understanding of medical terminology and clinical significance
+- 📊 **Structured Output** — Clean JSON API responses ready for downstream processing
 
-Enable healthcare providers and patients to upload lab results and receive AI-powered clinical interpretations with biomarker trend analysis and risk assessments.
+### Target Users
+
+- Healthcare providers and clinics
+- Patients managing their own health records
+- Health insurance companies
+- Clinical research platforms
+- EHR (Electronic Health Record) integration partners
 
 ---
 
 ## ✨ Features
 
-- ✅ **Multi-Format Upload Support** — CSV, lab reports, JSON biomarker data
-- ✅ **AI-Powered Analysis** — Integrates with OpenAI, Anthropic, or local LLMs
-- ✅ **Biomarker Normalization** — Standardizes lab units and reference ranges
-- ✅ **Clinical Flagging** — Automatically flags abnormal values with severity levels
-- ✅ **Risk Scoring** — Computes clinical risk scores (Framingham, ASCVD, etc.)
-- ✅ **Drug-Interaction Checking** — Cross-references medications with biomarkers
-- ✅ **HIPAA-Ready Architecture** — Designed for PHI handling with encryption and audit logging
-- ✅ **Model-Agnostic Design** — Swap AI providers without code changes
-- ✅ **Trend Analysis** — Tracks biomarker changes over time
-- ✅ **Post-Processing Guardrails** — Prevents unsafe clinical claims in AI output
+- 📄 **Multi-Format Document Support** — PDFs, images (JPG, PNG), scanned documents, text files
+- 🔍 **Optical Character Recognition (OCR)** — Extracts text from images and scanned documents
+- 🤖 **AI-Powered Interpretation** — Uses OpenAI/Anthropic to understand and contextualize medical content
+- 📋 **Structured Data Extraction** — Automatically identifies and extracts:
+  - Patient demographics
+  - Lab values and results
+  - Vital signs
+  - Diagnoses and clinical findings
+  - Medications and prescriptions
+  - Dates and timestamps
+- 🚩 **Automatic Flagging** — Highlights abnormal results and critical values
+- 💾 **Secure Storage** — Encrypted document storage with access controls
+- 🔗 **API Ready** — RESTful endpoints for easy integration
+- 📊 **Structured JSON Output** — Clean, machine-readable format
+- 🔐 **HIPAA Compliance** — Privacy-by-design architecture
+- 📈 **Trend Tracking** — Historical comparison when multiple reports uploaded
+- ⚡ **Batch Processing** — Handle multiple document uploads simultaneously
 
 ---
 
@@ -69,12 +85,16 @@ Enable healthcare providers and patients to upload lab results and receive AI-po
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | **Runtime** | Node.js v14+ | Server-side JavaScript execution |
-| **Framework** | Express.js | HTTP server & middleware |
-| **File Storage** | File system / S3 (optional) | Upload and parsing |
-| **Data Storage** | Optional (MongoDB, PostgreSQL) | Persistent biomarker & patient records |
-| **AI Integration** | OpenAI, Anthropic, local LLMs | Inference & clinical analysis |
-| **Parsing** | CSV, JSON parsers | Lab data extraction |
-| **Authentication** | Bearer tokens / API keys | Secure endpoint access |
+| **Framework** | Express.js | HTTP API server |
+| **OCR** | Tesseract.js / AWS Textract | Extract text from images/PDFs |
+| **PDF Processing** | pdf-lib, pdfjs-dist | Parse and process PDF documents |
+| **AI/LLM** | OpenAI GPT-4 / Anthropic Claude | Medical document analysis |
+| **File Storage** | Local filesystem / AWS S3 | Secure document storage |
+| **Database** | MongoDB / PostgreSQL (optional) | Document metadata & history |
+| **Authentication** | JWT / API Keys | Secure API access |
+| **Encryption** | AES-256, TLS 1.2+ | Data security at rest & in transit |
+| **Validation** | Joi / Zod | Input validation |
+| **Logging** | Winston / Pino | Audit trails and monitoring |
 
 ---
 
@@ -82,20 +102,45 @@ Enable healthcare providers and patients to upload lab results and receive AI-po
 
 ```
 backend/
-├── app.js                    # Express app initialization
-├── server.js                 # Server startup & configuration
-├── package.json              # Dependencies & scripts
-├── .env.example              # Environment variables template
-├── ReadMe.md                 # This file
+├── app.js                         # Express app initialization
+├── server.js                      # Server startup
+├── package.json                   # Dependencies
+├── .env.example                   # Environment template
+├── ReadMe.md                      # This file
+│
 ├── routes/
-│   ├── prompt.js             # POST /api/prompt - AI analysis endpoint
-│   └── upload.route.js       # POST /api/uploads - File upload handler
+│   ├── upload.route.js            # POST /api/documents/upload - Document upload
+│   └── prompt.js                  # POST /api/documents/analyze - AI analysis
+│
 ├── models/
-│   └── user.model.js         # User schema (extend with DB adapter)
-├── middleware/               # (optional) Authentication, error handling
-├── utils/                    # (optional) Parsing, normalization, validation
-├── config/                   # (optional) Reference ranges, drug interactions
-└── uploads/                  # 📂 Uploaded files directory (ensure secure)
+│   ├── user.model.js              # User schema
+│   └── document.model.js           # Document storage schema (optional)
+│
+├── services/
+│   ├── ocr.service.js             # OCR text extraction
+│   ├── ai.service.js              # AI document analysis
+│   ├── parser.service.js          # Parse clinical data
+│   └── storage.service.js         # File storage management
+│
+├── utils/
+│   ├── validators.js              # Input validation
+│   ├── formatters.js              # Response formatting
+│   ├── logger.js                  # Logging service
+│   └── encryption.js              # Data encryption
+│
+├── config/
+│   ├── ocr.config.js              # OCR settings
+│   ├── ai.config.js               # AI provider config
+│   └── reference.data.js           # Clinical reference ranges
+│
+├── middleware/
+│   ├── auth.js                    # Authentication
+│   ├── errorHandler.js            # Error handling
+│   └── validation.js              # Request validation
+│
+├── uploads/                       # 📂 Document storage
+├── logs/                          # 📂 Application logs
+└── tests/                         # 📂 Unit & integration tests
 ```
 
 ---
@@ -150,888 +195,679 @@ backend/
 
 ---
 
-## ⚙️ Configuration & Environment
+## ⚙️ Environment Configuration
 
 Create a `.env` file in the root directory:
 
 ```env
-# Server
+# Server Configuration
 PORT=3000
 NODE_ENV=development
 LOG_LEVEL=info
 
-# API Keys
+# AI Provider (Choose one)
+AI_PROVIDER=openai                    # 'openai' or 'anthropic'
 OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4
 ANTHROPIC_API_KEY=claude-...
-MODEL_PROVIDER=openai  # or 'anthropic', 'huggingface', 'local'
 
-# Database (optional)
+# OCR Configuration
+OCR_ENGINE=tesseract                 # 'tesseract' or 'aws-textract'
+AWS_ACCESS_KEY_ID=your-aws-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret
+AWS_REGION=us-east-1
+
+# File Upload Settings
+MAX_FILE_SIZE=50485760               # 50MB
+ALLOWED_DOCUMENT_TYPES=pdf,jpg,png,jpeg,tiff
+UPLOAD_DIR=./uploads
+SECURE_UPLOAD=true
+
+# Database (Optional)
 MONGODB_URI=mongodb://localhost:27017/mediscan
-POSTGRES_URL=postgresql://user:password@localhost:5432/mediscan
+POSTGRES_URL=postgresql://user:pass@localhost:5432/mediscan
 
 # Security
-JWT_SECRET=your-secret-key
-ENCRYPTION_KEY=your-encryption-key
+JWT_SECRET=your-jwt-secret-key
+ENCRYPTION_KEY=your-encryption-key-32-chars
+ENCRYPTION_ALGORITHM=aes-256-cbc
 
-# Upload
-MAX_FILE_SIZE=10485760  # 10MB
-ALLOWED_MIME_TYPES=text/csv,application/pdf,application/json
-
-# HIPAA Compliance
+# HIPAA & Compliance
 HIPAA_MODE=true
 AUDIT_LOG_PATH=./logs/audit.log
-```
+PHI_RETENTION_DAYS=365
+DATA_ANONYMIZATION=true
 
-### Environment Variables Explained
+# API Rate Limiting
+RATE_LIMIT_WINDOW=15               # minutes
+RATE_LIMIT_MAX_REQUESTS=100        # requests per window
+```
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `PORT` | Server port | `3000` |
-| `NODE_ENV` | Environment mode | `development` / `production` |
-| `MODEL_PROVIDER_KEY` | AI provider API key | `sk-...` |
-| `MONGODB_URI` | Database connection | `mongodb://...` |
-| `HIPAA_MODE` | Enable compliance logging | `true` |
+| `PORT` | Server listen port | `3000` |
+| `AI_PROVIDER` | Which AI service to use | `openai` or `anthropic` |
+| `OCR_ENGINE` | Text extraction tool | `tesseract` or `aws-textract` |
+| `MAX_FILE_SIZE` | Max document size in bytes | `50485760` (50MB) |
+| `HIPAA_MODE` | Enable compliance features | `true` or `false` |
 
 ---
 
 ## 🔌 API Endpoints
 
-All endpoints require authentication. Use `Authorization: Bearer <token>` header.
+### 1. **POST /api/documents/upload** — Upload Medical Document
 
-### 1. **POST /api/prompt** — AI Analysis Request
-
-Submits biomarker data for AI-powered clinical interpretation.
-
-**Request:**
-```json
-{
-  "patientId": "pat-12345",
-  "context": {
-    "age": 62,
-    "sex": "male",
-    "medications": ["lisinopril", "atorvastatin"],
-    "comorbidities": ["hypertension", "type-2-diabetes"]
-  },
-  "biomarkers": [
-    {
-      "name": "HbA1c",
-      "abbreviation": "HbA1c",
-      "value": 7.2,
-      "unit": "%",
-      "timestamp": "2025-11-28T10:00:00Z",
-      "referenceRange": {
-        "low": 4.0,
-        "high": 5.6,
-        "units": "%",
-        "population": "general"
-      }
-    },
-    {
-      "name": "Total Cholesterol",
-      "value": 245,
-      "unit": "mg/dL",
-      "timestamp": "2025-11-28T10:00:00Z"
-    }
-  ],
-  "instructions": "Provide plain-language interpretation of these results, identify at-risk biomarkers, and suggest next steps."
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "patientId": "pat-12345",
-  "analysis": {
-    "summary": "Patient shows elevated HbA1c indicating suboptimal diabetes control. Cholesterol levels are high; recommend lipid management.",
-    "riskFactors": ["elevated-glucose", "high-cholesterol"],
-    "recommendations": [
-      "Increase medication adherence for diabetes control",
-      "Consider statin therapy optimization",
-      "Schedule follow-up in 3 months"
-    ],
-    "confidence": 0.92
-  },
-  "timestamp": "2025-11-28T10:15:22Z"
-}
-```
-
-**Status Codes:**
-- `200` — Success
-- `400` — Invalid payload
-- `401` — Unauthorized
-- `500` — Server error
-
----
-
-### 2. **POST /api/uploads** — Lab Data Upload
-
-Accepts file uploads (CSV, PDF, JSON) and extracts biomarker data.
+Upload a medical report (PDF, image, etc.) for AI analysis.
 
 **Request:**
 ```
 Content-Type: multipart/form-data
 
-Form fields:
-- file: <binary file>
-- patientId: "pat-12345" (optional)
-- fileType: "csv" | "pdf" | "json"
+Form Fields:
+- file: <binary file> (required)
+- patientId: string (optional)
+- documentType: "lab_report" | "prescription" | "medical_record" | "imaging" | "other"
+- metadata: { dateOfService, provider, etc. } (optional)
+```
+
+**cURL Example:**
+```bash
+curl -X POST http://localhost:3000/api/documents/upload \
+  -H "Authorization: Bearer your-token" \
+  -F "file=@/path/to/lab_report.pdf" \
+  -F "patientId=pat-12345" \
+  -F "documentType=lab_report"
 ```
 
 **Response:**
 ```json
 {
   "success": true,
-  "fileId": "upload-98765",
-  "patientId": "pat-12345",
-  "fileName": "lab_results_2025-11.csv",
-  "uploadedAt": "2025-11-28T10:20:00Z",
-  "biomarkersExtracted": 15,
-  "biomarkers": [
-    {
-      "id": "bm-001",
-      "name": "Glucose",
-      "value": 145,
-      "unit": "mg/dL",
-      "flag": "high"
-    }
-  ],
-  "parseErrors": [],
-  "warnings": []
+  "documentId": "doc-abc123xyz",
+  "fileName": "lab_report_2025-01.pdf",
+  "uploadedAt": "2025-01-11T10:30:22Z",
+  "processingStatus": "processing",
+  "fileSize": 2048576,
+  "pages": 3,
+  "estimatedProcessingTime": "30 seconds"
 }
 ```
 
-**Supported Formats:**
-- CSV with headers: `biomarker_name, value, unit, reference_low, reference_high`
-- JSON with biomarker array
-- PDF lab reports (requires OCR integration)
-
 ---
 
-### 3. **GET /api/patient/:id/summary** — Patient Summary
+### 2. **POST /api/documents/analyze** — Analyze Uploaded Document
 
-Returns latest biomarkers, trends, and risk scores.
+Get AI-powered analysis and extracted data from an uploaded document.
+
+**Request:**
+```json
+{
+  "documentId": "doc-abc123xyz",
+  "analysisLevel": "detailed",
+  "includeRawText": false,
+  "focusAreas": ["lab_values", "diagnoses", "medications"]
+}
+```
 
 **Response:**
 ```json
 {
+  "success": true,
+  "documentId": "doc-abc123xyz",
+  "analysis": {
+    "documentType": "lab_report",
+    "processingTime": "2.3s",
+    "confidence": 0.94,
+    "extractedData": {
+      "patientInfo": {
+        "name": "[REDACTED]",
+        "dob": "[REDACTED]",
+        "mrn": "[REDACTED]"
+      },
+      "labResults": [
+        {
+          "testName": "Hemoglobin A1c",
+          "value": 7.2,
+          "unit": "%",
+          "referenceRange": "4.0-5.6%",
+          "flag": "high",
+          "severity": "moderate"
+        },
+        {
+          "testName": "Glucose (Fasting)",
+          "value": 145,
+          "unit": "mg/dL",
+          "referenceRange": "70-100 mg/dL",
+          "flag": "high",
+          "severity": "moderate"
+        }
+      ],
+      "vitals": {
+        "bloodPressure": "145/92",
+        "heartRate": 78,
+        "temperature": "98.6F"
+      },
+      "diagnoses": [
+        "Type 2 Diabetes Mellitus",
+        "Hypertension",
+        "Hyperlipidemia"
+      ],
+      "medications": [
+        {
+          "name": "Metformin",
+          "dosage": "1000mg",
+          "frequency": "twice daily"
+        },
+        {
+          "name": "Lisinopril",
+          "dosage": "10mg",
+          "frequency": "once daily"
+        }
+      ]
+    },
+    "summary": "Patient presents with elevated glucose levels (145 mg/dL) and HbA1c at 7.2%, indicating suboptimal diabetes control. Blood pressure elevated at 145/92. Current medications appear appropriate but may require dosage adjustment.",
+    "flaggedAbnormalities": [
+      "Elevated HbA1c (7.2%)",
+      "Elevated Fasting Glucose (145 mg/dL)",
+      "Elevated Blood Pressure (145/92)"
+    ],
+    "recommendations": [
+      "Increase metformin dosage or add second-line agent",
+      "Consider lifestyle modifications (diet, exercise)",
+      "Monitor BP and consider adjustment to lisinopril",
+      "Follow-up labs in 3 months"
+    ],
+    "clinicalNotes": "Results consistent with Type 2 Diabetes. Continue monitoring and optimize glycemic control.",
+    "riskAssessment": {
+      "cardiovascular": 0.68,
+      "kidney_disease": 0.32,
+      "diabetic_complications": 0.45
+    }
+  },
+  "timestamp": "2025-01-11T10:32:45Z",
+  "disclaimer": "⚠️ This analysis is AI-generated and for informational purposes only. Not a substitute for professional medical advice."
+}
+```
+
+---
+
+### 3. **GET /api/documents/:id** — Get Document Details
+
+Retrieve processed document and analysis results.
+
+**Response:**
+```json
+{
+  "documentId": "doc-abc123xyz",
   "patientId": "pat-12345",
-  "lastUpdated": "2025-11-28T10:00:00Z",
-  "latestBiomarkers": [
+  "fileName": "lab_report_2025-01.pdf",
+  "documentType": "lab_report",
+  "uploadedAt": "2025-01-11T10:30:22Z",
+  "processedAt": "2025-01-11T10:32:45Z",
+  "status": "completed",
+  "analysis": { /* same as analyze response */ }
+}
+```
+
+---
+
+### 4. **GET /api/documents** — List Patient Documents
+
+Get all documents for a patient.
+
+**Query Parameters:**
+- `patientId` (required)
+- `limit` (default: 10)
+- `skip` (default: 0)
+- `documentType` (optional filter)
+
+**Response:**
+```json
+{
+  "success": true,
+  "patientId": "pat-12345",
+  "totalDocuments": 5,
+  "documents": [
     {
-      "name": "HbA1c",
-      "value": 7.2,
-      "unit": "%",
-      "flag": "high",
-      "change": "+0.1% (30 days)"
+      "documentId": "doc-abc123xyz",
+      "fileName": "lab_report_2025-01.pdf",
+      "documentType": "lab_report",
+      "uploadedAt": "2025-01-11T10:30:22Z",
+      "processedAt": "2025-01-11T10:32:45Z"
+    }
+  ]
+}
+```
+
+---
+
+### 5. **POST /api/documents/batch** — Batch Upload & Process
+
+Upload and process multiple documents at once.
+
+**Request:**
+```
+Content-Type: multipart/form-data
+
+Form Fields:
+- files: [file1, file2, file3] (multiple files)
+- patientId: string
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "patientId": "pat-12345",
+  "uploadedCount": 3,
+  "documents": [
+    { "documentId": "doc-1", "status": "processing" },
+    { "documentId": "doc-2", "status": "processing" },
+    { "documentId": "doc-3", "status": "processing" }
+  ]
+}
+```
+
+---
+
+## 📊 How It Works
+
+### Document Processing Pipeline
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ 1. USER UPLOADS MEDICAL DOCUMENT (PDF, Image, etc.)          │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 2. FILE VALIDATION & SECURITY SCAN                           │
+│  - Check file type & size                                    │
+│  - Scan for malware                                          │
+│  - Validate MIME type                                        │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 3. OCR PROCESSING (Extract Text)                             │
+│  - PDF → Text extraction                                     │
+│  - Images → Tesseract/AWS Textract                           │
+│  - Handle multi-page documents                               │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 4. AI ANALYSIS & INTERPRETATION                              │
+│  - Send text to GPT-4 / Claude                               │
+│  - Extract structured clinical data                          │
+│  - Identify lab values, diagnoses, medications               │
+│  - Generate clinical summary                                 │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 5. DATA STRUCTURING & PARSING                                │
+│  - Normalize lab values & units                              │
+│  - Flag abnormal results                                     │
+│  - Match against reference ranges                            │
+│  - Extract key metrics                                       │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 6. SECURITY & COMPLIANCE                                     │
+│  - Remove/redact PHI if needed                               │
+│  - Encrypt sensitive data                                    │
+│  - Log access for audit trail                                │
+│  - Secure storage                                            │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 7. RETURN STRUCTURED JSON RESPONSE                           │
+│  - Extracted clinical data                                   │
+│  - AI analysis & recommendations                             │
+│  - Flagged abnormalities                                     │
+│  - Risk assessments                                          │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Example: What Happens When You Upload a Lab Report PDF
+
+**Input:** Scanned/PDF lab report from hospital
+
+**MediScan Does:**
+1. Reads PDF file and extracts text using OCR
+2. Sends extracted text to GPT-4 with a specialized prompt
+3. GPT-4 identifies all lab values, reference ranges, and clinical findings
+4. Backend parses response and structures data
+5. Compares lab values against reference ranges
+6. Flags abnormal results (high/low)
+7. Returns clean JSON with all extracted information
+
+**Output:** Structured JSON with patient labs, vital signs, diagnoses, medications, and AI-generated summary
+
+---
+
+## 📄 Document Processing
+
+### Supported Document Types
+
+| Document Type | Format | Details |
+|---------------|--------|---------|
+| **Lab Reports** | PDF, Image | Blood work, urinalysis, pathology |
+| **Prescriptions** | PDF, Image | Medication details, dosages |
+| **Clinical Notes** | PDF, Text | Doctor's notes, observations |
+| **Discharge Summaries** | PDF | Hospital discharge info |
+| **Imaging Reports** | PDF, Image | X-ray, CT, MRI findings |
+| **Vital Signs Sheets** | PDF, Image | Blood pressure, temperature logs |
+| **Medical Records** | PDF | Historical medical data |
+
+### File Size & Format Limits
+
+```env
+MAX_FILE_SIZE=50485760                    # 50MB
+ALLOWED_FORMATS=pdf,jpg,png,jpeg,tiff,txt
+MAX_PAGES_PER_PDF=50
+OCR_TIMEOUT=120000                        # 2 minutes
+```
+
+### What Gets Extracted
+
+The AI automatically identifies and extracts:
+
+```json
+{
+  "patientDemographics": {
+    "name": "...",           // [REDACTED in HIPAA mode]
+    "dateOfBirth": "...",
+    "mrn": "...",
+    "age": "..."
+  },
+  "labResults": {
+    "testName": "...",
+    "value": "...",
+    "unit": "...",
+    "referenceRange": "...",
+    "flag": "high|normal|low",
+    "abnormal": true|false
+  },
+  "vitals": {
+    "bloodPressure": "...",
+    "heartRate": "...",
+    "temperature": "...",
+    "respiratoryRate": "..."
+  },
+  "diagnoses": ["...", "..."],
+  "medications": [
+    {
+      "name": "...",
+      "dosage": "...",
+      "frequency": "...",
+      "route": "..."
     }
   ],
-  "riskScores": {
-    "cardiovascular": 0.42,
-    "diabetes": 0.65
-  }
+  "procedures": ["...", "..."],
+  "testDate": "2025-01-11",
+  "resultDate": "2025-01-11"
 }
 ```
 
 ---
 
-## 📊 Data Model & Contracts
+## 🤖 AI Integration
 
-### Biomarker Object
+### How AI Analyzes Documents
 
-Represents a single lab measurement with clinical context.
+1. **Prompt Engineering** — Specialized prompts guide AI to extract medical data
+2. **Structured Output** — AI returns JSON-formatted clinical data
+3. **Context Awareness** — Model understands medical terminology and significance
+4. **Confidence Scores** — Each extraction includes confidence level
+5. **Error Handling** — Gracefully handles ambiguous or unclear sections
 
-```typescript
-interface Biomarker {
-  id: string;                    // Unique identifier
-  name: string;                  // e.g., "Hemoglobin A1c"
-  abbreviation: string;          // e.g., "HbA1c"
-  value: number;                 // Measured value
-  unit: string;                  // e.g., "%", "mg/dL", "mmol/L"
-  timestamp: string;             // ISO 8601 datetime
-  referenceRange: {
-    low: number;
-    high: number;
-    units: string;
-    population?: string;         // e.g., "general", "adult-male", "pediatric"
-  };
-  flag: "low" | "normal" | "high";  // Clinical flag based on range
-  severity?: "mild" | "moderate" | "severe";  // Deviation intensity
-  trend?: "improving" | "stable" | "worsening";  // Temporal change
-}
-```
-
-### Prompt Payload
-
-Request format for AI analysis.
-
-```typescript
-interface PromptPayload {
-  patientId?: string;
-  context: {
-    age: number;
-    sex: "male" | "female" | "other";
-    medications?: string[];
-    comorbidities?: string[];
-    allergies?: string[];
-  };
-  biomarkers: Biomarker[];
-  instructions: string;        // What to analyze
-  includeRiskScores?: boolean;
-  modelHints?: string[];        // e.g., ["focus on diabetes", "check drug interactions"]
-}
-```
-
-### AI Response Contract
-
-```typescript
-interface AnalysisResponse {
-  success: boolean;
-  patientId?: string;
-  analysis: {
-    summary: string;            // Plain-language interpretation
-    riskFactors: string[];      // Identified risks
-    recommendations: string[];  // Clinical next steps
-    confidence: number;         // 0–1 confidence score
-  };
-  flaggedBiomarkers: string[];  // Names of abnormal results
-  drugInteractions?: Array<{
-    medication: string;
-    biomarker: string;
-    interaction: string;
-  }>;
-  timestamp: string;
-}
-```
-
----
-
-## 🤖 AI / Model Integration (Design & Safety)
-
-### Architecture Overview
-
-The backend is **model-agnostic** and supports multiple AI providers:
-
-```
-┌─────────────────────────────────────────────────┐
-│         API Request (POST /api/prompt)          │
-└────────────────────┬────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────┐
-│     Data Validation & Normalization Layer       │
-│  - Validate biomarker data                      │
-│  - Check reference ranges                       │
-│  - Cross-reference medications                  │
-└────────────────────┬────────────────────────────┘
-                     │
-        ┌────────────┼────────────┐
-        │            │            │
-        ▼            ▼            ▼
-    [OpenAI]   [Anthropic]   [Local LLM]
-    (GPT-4)     (Claude)      (Llama)
-        │            │            │
-        └────────────┼────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────┐
-│    Post-Processing & Guardrails Layer           │
-│  - Remove unsafe clinical claims                │
-│  - Add disclaimers                              │
-│  - Apply rule-based overrides                   │
-└────────────────────┬────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────┐
-│         Response (JSON Analysis)                │
-└─────────────────────────────────────────────────┘
-```
-
-### Supported Providers
-
-| Provider | Model | Cost | Latency | Best For |
-|----------|-------|------|---------|----------|
-| OpenAI | GPT-4, GPT-4o | $$$ | Low | Complex reasoning |
-| Anthropic | Claude 3.5 | $$$ | Low | Safety & reliability |
-| Hugging Face | Mistral, Llama 2 | $ | Medium | Self-hosted option |
-| Local | Ollama, vLLM | Free | High | On-premise HIPAA |
-
-### Key Design Principles
-
-#### 1. **Data Minimization**
-- Send only essential biomarkers to the model
-- Exclude raw patient identifiers (use pseudonyms)
-- Limit context to relevant clinical history
-
-#### 2. **PHI Separation**
-```javascript
-// ✅ GOOD: Anonymized data sent to external API
-const payload = {
-  age: 62,
-  biomarkers: [{ name: "HbA1c", value: 7.2 }],
-  instructions: "Interpret these results"
-};
-// Omit: patientId, name, email, insurance
-
-// ❌ BAD: Don't send PHI to untrusted providers
-const badPayload = {
-  patientId: "12345",
-  name: "John Smith",
-  ssn: "123-45-6789",
-  biomarkers: [...]
-};
-```
-
-#### 3. **Prompt Engineering**
-Construct structured prompts that guide the AI model:
+### Supported AI Providers
 
 ```javascript
-const systemPrompt = `You are a clinical assistant. Your role is to:
-1. Interpret lab values against reference ranges
-2. Identify abnormal results with severity
-3. Suggest safe, evidence-based next steps
-4. NEVER provide a diagnosis or replace clinical judgment
-5. Always recommend consulting a licensed physician`;
+// Switch providers easily via .env
+if (process.env.AI_PROVIDER === 'openai') {
+  // Use GPT-4 for analysis
+} else if (process.env.AI_PROVIDER === 'anthropic') {
+  // Use Claude for analysis
+}
+```
 
-const userPrompt = `
-Analyze these biomarkers:
-- HbA1c: 7.2% (ref: 4.0–5.6%, flag: high)
-- Glucose: 145 mg/dL (ref: 70–100, flag: high)
+| Provider | Model | Cost | Speed | Best For |
+|----------|-------|------|-------|----------|
+| **OpenAI** | GPT-4 / GPT-4o | $$$ | Fast | Complex medical documents |
+| **Anthropic** | Claude 3.5 | $$$ | Fast | Detailed analysis |
+| **Google** | Gemini Pro | $$ | Medium | Multi-modal input |
+| **Local** | Llama 2 | Free | Slow | On-premises deployment |
 
-Patient context: 62-year-old male, on metformin.
+### AI Prompt Example
 
-Please provide interpretation and recommendations.
+```javascript
+const prompt = `
+You are an expert medical document analyzer. Your task is to:
+
+1. Extract all lab values with units and reference ranges
+2. Identify all diagnoses mentioned
+3. List all medications with dosages
+4. Extract vital signs
+5. Note any abnormal findings
+
+Return the data STRICTLY as valid JSON (no markdown, no code blocks).
+Use this structure:
+{
+  "labResults": [],
+  "diagnoses": [],
+  "medications": [],
+  "vitals": {},
+  "abnormalFindings": [],
+  "clinicalSummary": ""
+}
+
+Text to analyze:
+[${documentText}]
 `;
 ```
 
-#### 4. **Post-Processing Guardrails**
-
-Apply rule-based checks to ensure safe output:
-
-```javascript
-function applySafetyGuardrails(aiOutput) {
-  let safe = aiOutput
-    .replace(/\bdiagnosis\b/gi, "possible indication")
-    .replace(/\bcertain\b/gi, "may indicate")
-    .replace(/\byou have\b/gi, "results suggest you may have");
-
-  // Add disclaimer
-  safe += "\n\n⚠️ Disclaimer: This analysis is informational only. " +
-          "Consult a licensed healthcare provider for medical decisions.";
-
-  return safe;
-}
-```
-
-### Configuration
-
-Add to `.env`:
-```env
-MODEL_PROVIDER=openai
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4
-PROMPT_TEMPERATURE=0.3      # Lower = more consistent, deterministic
-MAX_TOKENS=1000
-SAFETY_GUARDRAILS_ENABLED=true
-```
-
 ---
 
-## 🧬 Biological Interpretation Logic (Backend-Facing)
+## 📋 Data Extraction
 
-This section explains how biomarker values are interpreted programmatically. Critical for data scientists and backend engineers.
+### What Gets Automatically Extracted
 
-### Reference Ranges & Contextualization
+When MediScan processes a medical document, it extracts:
 
-Many biomarkers have **age-**, **sex-**, and **method-specific ranges**. Implement flexible reference storage:
+#### Lab Results
+- Test name (e.g., "Hemoglobin A1c")
+- Value (e.g., 7.2)
+- Unit (e.g., %)
+- Reference range (e.g., 4.0-5.6%)
+- Flag status (high/normal/low)
+- Abnormality severity
 
-```json
-{
-  "biomarkers": {
-    "HbA1c": {
-      "displayName": "Hemoglobin A1c",
-      "unit": "%",
-      "references": {
-        "general": { "low": 4.0, "high": 5.6 },
-        "diabetic-control": { "low": 0, "high": 7.0 },
-        "elderly-70plus": { "low": 4.0, "high": 8.0 }
-      }
-    },
-    "Hemoglobin": {
-      "displayName": "Hemoglobin",
-      "unit": "g/dL",
-      "references": {
-        "adult-male": { "low": 13.5, "high": 17.5 },
-        "adult-female": { "low": 12.0, "high": 15.5 },
-        "pediatric-5to12": { "low": 11.5, "high": 15.5 }
-      }
-    }
-  }
-}
-```
+#### Vital Signs
+- Blood pressure (e.g., 145/92)
+- Heart rate (e.g., 78 bpm)
+- Temperature (e.g., 98.6°F)
+- Respiratory rate
+- BMI / Weight
 
-**Best Practice:** Tag missing reference ranges as `"reference_not_available"` and flag for clinical review.
+#### Clinical Information
+- Diagnoses (e.g., "Type 2 Diabetes")
+- Chief complaints
+- History of present illness
+- Past medical history
+- Medications & dosages
+- Allergies
+- Procedures performed
 
-### Flagging Rules
+#### Document Metadata
+- Test date
+- Result date
+- Provider name
+- Facility name
+- Report type
 
-Implement multi-level flagging based on deviation severity:
+### Extraction Confidence Scores
 
-```javascript
-function flagBiomarker(biomarker, referenceRange) {
-  const { value, low, high } = { value: biomarker.value, ...referenceRange };
-
-  // Determine base flag
-  let flag = "normal";
-  if (value < low) flag = "low";
-  if (value > high) flag = "high";
-
-  // Calculate severity
-  let severity = undefined;
-  if (flag !== "normal") {
-    const range = high - low;
-    const deviation = flag === "low" ? 
-      ((low - value) / range) : 
-      ((value - high) / range);
-
-    if (deviation < 0.1) severity = "mild";
-    else if (deviation < 0.3) severity = "moderate";
-    else severity = "severe";
-  }
-
-  return { flag, severity };
-}
-```
-
-### Temporal Analysis
-
-Track changes across time intervals:
-
-```javascript
-function analyzeTrend(historicalValues) {
-  if (historicalValues.length < 2) return "insufficient-data";
-
-  const latest = historicalValues[0];
-  const previous = historicalValues[1];
-  const delta = latest.value - previous.value;
-  const pctChange = (delta / previous.value) * 100;
-
-  if (Math.abs(pctChange) < 2) return "stable";
-  if (pctChange > 0) return "worsening";
-  return "improving";
-}
-
-// Example: HbA1c 5.9% → 6.6% is flagged differently than stable 6.6%
-```
-
-### Risk Score Calculation
-
-Implement validated clinical calculators:
-
-```javascript
-function calculateFraminghamRisk(patient) {
-  // Framingham Cardiovascular Risk Score
-  const {
-    age, sex, totalCholesterol, hdl, sbp, 
-    isOnBP, isSmoker, hasDiabetes
-  } = patient;
-
-  // Points calculation (simplified)
-  let points = 0;
-  points += age < 40 ? 0 : age < 50 ? 1 : 2;
-  points += totalCholesterol < 160 ? -2 : totalCholesterol > 240 ? 2 : 0;
-  points += hdl > 60 ? -2 : hdl < 40 ? 2 : 0;
-  // ... more risk factors
-
-  // Convert to 10-year risk percentage
-  return calculateRiskPercentage(points);
-}
-```
-
-### Drug–Biomarker Interactions
-
-Maintain a lookup table for common interactions:
+Each extracted field includes a confidence score (0.0 - 1.0):
 
 ```json
 {
-  "drugInteractions": {
-    "atorvastatin": {
-      "affects": ["total-cholesterol", "ldl", "triglycerides"],
-      "expected": {
-        "total-cholesterol": "decreases 20–30%",
-        "ldl": "decreases 30–40%"
-      }
-    },
-    "metformin": {
-      "affects": ["glucose", "hba1c"],
-      "expected": { "glucose": "decreases 15–30%" }
-    },
-    "lisinopril": {
-      "affects": ["creatinine", "potassium"],
-      "caution": "May increase creatinine; monitor kidney function"
-    }
-  }
+  "field": "HbA1c",
+  "value": 7.2,
+  "unit": "%",
+  "confidence": 0.98,      // 98% confident in this extraction
+  "source": "Lab Results table, Row 3"
 }
 ```
 
 ---
 
-## 🔒 Security, Privacy & Compliance
+## 🔒 Security & Privacy
 
-### HIPAA Compliance (if handling PHI)
+### HIPAA Compliance
 
-- **Encryption at Rest:** Use AES-256 for sensitive data storage
-- **Encryption in Transit:** Enforce TLS 1.2+ for all connections
-- **Access Control:** Implement role-based access control (RBAC)
-- **Audit Logging:** Log all access with timestamps and user IDs
-- **Data Retention:** Define and enforce data retention policies
-- **Business Associate Agreements (BAAs):** Ensure all vendors (AI providers, cloud hosts) are HIPAA-compliant
+MediScan is built with HIPAA requirements in mind:
 
-### Data Minimization
+- ✅ **Encryption at Rest** — AES-256 for stored documents
+- ✅ **Encryption in Transit** — TLS 1.2+ for all connections
+- ✅ **Access Control** — Authentication & authorization
+- ✅ **Audit Logging** — All access logged with timestamps
+- ✅ **Data Minimization** — Only necessary data processed
+- ✅ **PHI Redaction** — Automatic redaction of sensitive info
+- ✅ **Data Retention** — Configurable retention policies
+- ✅ **Business Associate Agreements** — Vendor compliance
 
-**Principle:** Only collect, process, and store data necessary for the use case.
-
-```javascript
-// ✅ GOOD: Send minimal data
-const minimalPayload = {
-  age: 62,
-  biomarkers: [{ name: "HbA1c", value: 7.2, unit: "%" }],
-  instructions: "Interpret results"
-};
-
-// ❌ BAD: Include unnecessary PHI
-const excessivePayload = {
-  patientId: "12345",
-  firstName: "John",
-  lastName: "Smith",
-  ssn: "123-45-6789",
-  email: "john@example.com",
-  address: "123 Main St, Anytown, USA",
-  ...
-};
-```
-
-### PHI Handling Best Practices
-
-1. **Use Pseudonymization**
-   ```javascript
-   // Hash patient IDs
-   const patientHash = sha256(patientId + salt);
-   // Never log real identifiers
-   ```
-
-2. **Separate Storage**
-   ```
-   Secure Database (HIPAA) ← → Patient Identifiers
-   |
-   De-identified Data ← → AI Provider (may not be HIPAA)
-   ```
-
-3. **Access Logs**
-   ```javascript
-   // Log all PHI access
-   logger.audit({
-     timestamp: new Date(),
-     userId: req.user.id,
-     action: "PHI_READ",
-     resource: "patient_labs",
-     patientHash: hash(patientId),
-     ipAddress: req.ip
-   });
-   ```
-
-### Audit & Logging
-
-Enable comprehensive audit trails:
+### PHI (Protected Health Information) Handling
 
 ```javascript
-const auditLog = {
-  timestamp: "2025-11-28T10:15:22Z",
-  userId: "user-456",
-  action: "PROMPT_SUBMITTED",
-  resourceId: "pat-hash-123",
-  status: "success",
-  ipAddress: "192.168.1.100",
-  userAgent: "Mozilla/5.0...",
-  additionalInfo: {
-    biomarkersProcessed: 5,
-    aiProvider: "openai",
-    responseTime: "1200ms"
-  }
-};
+// In HIPAA_MODE, sensitive data is automatically redacted
+if (process.env.HIPAA_MODE === 'true') {
+  extractedData.patientName = "[REDACTED]";
+  extractedData.ssn = "[REDACTED]";
+  extractedData.mrn = "[REDACTED]";
+  extractedData.dateOfBirth = "[REDACTED]";
+  extractedData.address = "[REDACTED]";
+}
+
+// Store encrypted
+const encrypted = encryptWithAES256(sensitiveData);
 ```
 
-### Environment-Based Security
+### Data Storage Security
 
 ```bash
-# .env.production
-HIPAA_MODE=true
-AUDIT_LOG_PATH=/var/log/mediscan/audit.log
-ENCRYPTION_KEY_PATH=/secure/vault/encryption.key
-DB_SSL=true
-API_RATE_LIMIT=100  # requests per minute
-REQUIRE_API_KEY=true
+# Uploaded documents stored with encryption
+/uploads/[encrypted-filename].enc
+
+# Access logs maintained
+/logs/audit.log
+
+# Retention policy enforced
+# PHI deleted after 365 days (configurable)
+```
+
+### Authentication
+
+```javascript
+// All API endpoints require authentication
+app.use(authenticateToken);  // Middleware checks JWT
+
+// Example: Include token in requests
+Authorization: Bearer eyJhbGc...
 ```
 
 ---
 
-## 📤 Uploads and Parsing
-
-### File Upload Validation
-
-Implement strict validation for all uploaded files:
-
-```javascript
-const uploadConfig = {
-  maxFileSize: 10 * 1024 * 1024,      // 10 MB
-  allowedMimeTypes: [
-    "text/csv",
-    "application/json",
-    "application/pdf"
-  ],
-  allowedExtensions: [".csv", ".json", ".pdf"]
-};
-
-function validateUpload(file) {
-  // Check size
-  if (file.size > uploadConfig.maxFileSize) {
-    throw new Error("File exceeds maximum size");
-  }
-
-  // Check MIME type
-  if (!uploadConfig.allowedMimeTypes.includes(file.mimetype)) {
-    throw new Error("Invalid file type");
-  }
-
-  // Check extension
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (!uploadConfig.allowedExtensions.includes(ext)) {
-    throw new Error("Invalid file extension");
-  }
-
-  return true;
-}
-```
-
-### CSV Parsing Example
-
-Expected CSV format:
-
-```csv
-biomarker_name,value,unit,reference_low,reference_high,date
-HbA1c,7.2,%,4.0,5.6,2025-11-28
-Glucose,145,mg/dL,70,100,2025-11-28
-Creatinine,1.1,mg/dL,0.7,1.3,2025-11-28
-```
-
-Parsing logic:
-
-```javascript
-function parseCSV(filePath) {
-  return new Promise((resolve, reject) => {
-    const biomarkers = [];
-    
-    fs.createReadStream(filePath)
-      .pipe(csv())
-      .on("data", (row) => {
-        biomarkers.push({
-          name: row.biomarker_name,
-          value: parseFloat(row.value),
-          unit: row.unit,
-          timestamp: new Date(row.date).toISOString(),
-          referenceRange: {
-            low: parseFloat(row.reference_low),
-            high: parseFloat(row.reference_high)
-          }
-        });
-      })
-      .on("end", () => resolve(biomarkers))
-      .on("error", reject);
-  });
-}
-```
-
-### Upload Response
-
-```json
-{
-  "success": true,
-  "uploadId": "upload-98765",
-  "fileName": "lab_results_2025-11.csv",
-  "uploadedAt": "2025-11-28T10:20:00Z",
-  "status": "processed",
-  "biomarkersExtracted": 15,
-  "parseErrors": [],
-  "warnings": [
-    "Row 5: Missing reference range for 'TSH' — using default",
-    "Row 8: Timestamp invalid; using upload date"
-  ],
-  "biomarkerSummary": {
-    "totalCount": 15,
-    "flagged": 3,
-    "highCount": 2,
-    "lowCount": 1
-  }
-}
-```
-
----
-
-## ✅ Testing & Validation (Backend)
+## ✅ Testing
 
 ### Unit Tests
 
-Test parsing, normalization, and flagging logic:
+Test OCR, parsing, and AI response handling:
 
-```javascript
-// tests/biomarker.test.js
-describe("Biomarker Flagging", () => {
-  test("should flag HbA1c 7.2% as high", () => {
-    const biomarker = {
-      name: "HbA1c",
-      value: 7.2,
-      referenceRange: { low: 4.0, high: 5.6 }
-    };
-    const result = flagBiomarker(biomarker);
-    expect(result.flag).toBe("high");
-    expect(result.severity).toBe("moderate");
-  });
+```bash
+npm test
 
-  test("should handle missing reference ranges gracefully", () => {
-    const biomarker = { name: "CustomMarker", value: 100 };
-    const result = flagBiomarker(biomarker);
-    expect(result.flag).toBe("unknown");
-  });
-});
+# Run specific test
+npm test -- ocr.service.test.js
+npm test -- ai.service.test.js
 
-describe("CSV Parsing", () => {
-  test("should parse valid CSV file", async () => {
-    const result = await parseCSV("./test-data/labs.csv");
-    expect(result).toHaveLength(15);
-    expect(result[0].name).toBe("HbA1c");
-  });
-
-  test("should reject invalid MIME type", async () => {
-    const file = { mimetype: "application/exe" };
-    expect(() => validateUpload(file)).toThrow();
-  });
-});
+# Coverage report
+npm run test:coverage
 ```
 
 ### Integration Tests
 
-Test API endpoints with mock responses:
-
-```javascript
-// tests/api.integration.test.js
-describe("POST /api/prompt", () => {
-  test("should return analysis for valid biomarkers", async () => {
-    const response = await request(app)
-      .post("/api/prompt")
-      .set("Authorization", `Bearer ${testToken}`)
-      .send({
-        context: { age: 62, sex: "male" },
-        biomarkers: [
-          { name: "HbA1c", value: 7.2, unit: "%" }
-        ],
-        instructions: "Analyze these results"
-      });
-
-    expect(response.status).toBe(200);
-    expect(response.body.analysis).toBeDefined();
-    expect(response.body.analysis.summary).toBeTruthy();
-  });
-
-  test("should reject missing authorization", async () => {
-    const response = await request(app)
-      .post("/api/prompt")
-      .send({ /* payload */ });
-
-    expect(response.status).toBe(401);
-  });
-});
-```
-
-### Running Tests
+Test full document processing pipeline:
 
 ```bash
-# Run all tests
-npm test
+# Test upload endpoint
+npm run test:integration
 
-# Run with coverage
-npm run test:coverage
-
-# Run specific test file
-npm test -- biomarker.test.js
-
-# Watch mode
-npm run test:watch
+# Test with sample documents
+npm run test:e2e
 ```
 
-### Test Configuration (package.json)
+### Manual Testing
 
-```json
-{
-  "scripts": {
-    "test": "jest --passWithNoTests",
-    "test:coverage": "jest --coverage",
-    "test:watch": "jest --watch"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "coveragePathIgnorePatterns": ["/node_modules/"],
-    "collectCoverageFrom": ["**/*.js", "!node_modules/**"]
-  }
-}
+```bash
+# Start server in dev mode
+npm run dev
+
+# In another terminal, test upload
+curl -X POST http://localhost:3000/api/documents/upload \
+  -H "Authorization: Bearer test-token" \
+  -F "file=@sample_lab_report.pdf"
 ```
 
 ---
 
-## 🚢 Deployment & Operations
+## 🚢 Deployment
 
-### Local Development
+### Quick Start (Local Development)
 
 ```bash
-# Install dependencies
+# 1. Clone repository
+git clone https://github.com/your-org/mediscan.git
+cd mediscan/backend
+
+# 2. Install dependencies
 npm install
 
-# Start development server with hot reload
+# 3. Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# 4. Start server
 npm run dev
 
-# Server runs on http://localhost:3000
+# Server runs at http://localhost:3000
 ```
 
 ### Docker Deployment
 
-Create a `Dockerfile`:
-
-```dockerfile
-FROM node:18-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
-```
-
-Build and run:
-
 ```bash
+# Build image
 docker build -t mediscan-backend:latest .
-docker run -p 3000:3000 --env-file .env mediscan-backend:latest
+
+# Run container
+docker run -d \
+  -p 3000:3000 \
+  --env-file .env \
+  -v $(pwd)/uploads:/app/uploads \
+  --name mediscan-backend \
+  mediscan-backend:latest
+
+# View logs
+docker logs -f mediscan-backend
 ```
 
-### Docker Compose
-
-For full stack (backend + database):
+### Docker Compose (Full Stack)
 
 ```yaml
-# docker-compose.yml
 version: '3.8'
 services:
   backend:
@@ -1043,11 +879,16 @@ services:
       MONGODB_URI: mongodb://mongo:27017/mediscan
     depends_on:
       - mongo
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
 
   mongo:
     image: mongo:6
     volumes:
       - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: mediscan
 
 volumes:
   mongo-data:
@@ -1055,478 +896,362 @@ volumes:
 
 Run: `docker-compose up -d`
 
-### Process Manager (PM2)
-
-For production Node.js process management:
+### Production Deployment (PM2)
 
 ```bash
 npm install -g pm2
 
 # Start application
-pm2 start app.js --name "mediscan-backend"
+pm2 start app.js --name "mediscan-backend" --instances 4
 
-# Enable startup on system reboot
+# Auto-restart on reboot
 pm2 startup
 pm2 save
 
 # Monitor
-pm2 logs
 pm2 monit
+pm2 logs mediscan-backend
 ```
 
-### Health Checks
+### Environment Variables for Production
 
-Implement a health check endpoint:
-
-```javascript
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV,
-    checks: {
-      database: "connected",
-      aiProvider: "available",
-      diskSpace: "sufficient"
-    }
-  });
-});
-```
-
-### Monitoring & Observability
-
-**Logging:**
 ```bash
-npm install winston
-```
-
-```javascript
-const winston = require('winston');
-
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' })
-  ]
-});
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
-}
-```
-
-**Metrics:**
-```bash
-npm install prom-client  # Prometheus metrics
-```
-
-**APM (Application Performance Monitoring):**
-- NewRelic
-- Datadog
-- Elastic APM
-- Scout APM
-
-### Load Balancing & Scaling
-
-Use Nginx or AWS load balancers:
-
-```nginx
-upstream mediscan_backend {
-  server 127.0.0.1:3000;
-  server 127.0.0.1:3001;
-  server 127.0.0.1:3002;
-}
-
-server {
-  listen 80;
-  server_name api.mediscan.example.com;
-
-  location / {
-    proxy_pass http://mediscan_backend;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-  }
-}
+NODE_ENV=production
+PORT=3000
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+HIPAA_MODE=true
+RATE_LIMIT_MAX_REQUESTS=1000
 ```
 
 ---
 
-## 📝 Example API Usage
+## 📝 Examples
 
-### cURL Examples
+### Complete Upload & Analysis Example
 
-#### 1. AI Analysis Request
+#### Step 1: Upload a Medical Document
 
 ```bash
-curl -X POST https://api.mediscan.example.com/api/prompt \
-  -H "Authorization: Bearer your-api-token-here" \
+curl -X POST http://localhost:3000/api/documents/upload \
+  -H "Authorization: Bearer your-jwt-token" \
+  -F "file=@lab_report.pdf" \
+  -F "patientId=pat-12345" \
+  -F "documentType=lab_report"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "documentId": "doc-abc123",
+  "fileName": "lab_report.pdf",
+  "uploadedAt": "2025-01-11T10:30:00Z",
+  "processingStatus": "processing"
+}
+```
+
+#### Step 2: Get Analysis Results
+
+```bash
+curl -X POST http://localhost:3000/api/documents/analyze \
+  -H "Authorization: Bearer your-jwt-token" \
   -H "Content-Type: application/json" \
   -d '{
-    "patientId": "pat-12345",
-    "context": {
-      "age": 62,
-      "sex": "male",
-      "medications": ["lisinopril", "atorvastatin"],
-      "comorbidities": ["hypertension", "type-2-diabetes"]
-    },
-    "biomarkers": [
-      {
-        "name": "HbA1c",
-        "abbreviation": "HbA1c",
-        "value": 7.2,
-        "unit": "%",
-        "timestamp": "2025-11-28T10:00:00Z",
-        "referenceRange": {
-          "low": 4.0,
-          "high": 5.6,
-          "units": "%",
-          "population": "general"
-        }
-      },
-      {
-        "name": "Total Cholesterol",
-        "value": 245,
-        "unit": "mg/dL",
-        "timestamp": "2025-11-28T10:00:00Z"
-      }
-    ],
-    "instructions": "Provide interpretation and recommendations."
+    "documentId": "doc-abc123",
+    "analysisLevel": "detailed"
   }'
 ```
 
-**Expected Response:**
+**Response:**
 ```json
 {
   "success": true,
   "analysis": {
-    "summary": "Patient shows elevated HbA1c (7.2%) indicating suboptimal diabetes control. Total cholesterol is elevated at 245 mg/dL; statin therapy should be reviewed.",
-    "riskFactors": ["elevated-glucose", "high-cholesterol", "cardiovascular-risk"],
+    "documentType": "lab_report",
+    "confidence": 0.96,
+    "extractedData": {
+      "labResults": [
+        {
+          "testName": "Hemoglobin A1c",
+          "value": 7.2,
+          "unit": "%",
+          "referenceRange": "4.0-5.6%",
+          "flag": "high",
+          "severity": "moderate"
+        }
+      ],
+      "diagnoses": ["Type 2 Diabetes"],
+      "medications": [
+        { "name": "Metformin", "dosage": "1000mg", "frequency": "twice daily" }
+      ]
+    },
+    "summary": "Lab results show elevated HbA1c indicating suboptimal diabetes control.",
     "recommendations": [
       "Optimize diabetes medication regimen",
-      "Consider statin therapy intensification",
       "Increase physical activity",
-      "Schedule follow-up in 3 months"
-    ],
-    "confidence": 0.94
-  },
-  "timestamp": "2025-11-28T10:15:22Z"
+      "Schedule 3-month follow-up"
+    ]
+  }
 }
 ```
 
-#### 2. File Upload
-
-```bash
-curl -X POST https://api.mediscan.example.com/api/uploads \
-  -H "Authorization: Bearer your-api-token-here" \
-  -F "file=@/path/to/lab_results.csv" \
-  -F "patientId=pat-12345"
-```
-
-#### 3. Get Patient Summary
-
-```bash
-curl -X GET https://api.mediscan.example.com/api/patient/pat-12345/summary \
-  -H "Authorization: Bearer your-api-token-here"
-```
-
-### JavaScript/Node.js Example
+### Node.js / JavaScript Integration
 
 ```javascript
 const axios = require('axios');
 
-const client = axios.create({
-  baseURL: 'https://api.mediscan.example.com',
-  headers: {
-    'Authorization': `Bearer ${process.env.API_TOKEN}`
-  }
-});
+async function analyzePatientLabReport() {
+  const client = axios.create({
+    baseURL: 'http://localhost:3000',
+    headers: {
+      'Authorization': `Bearer ${process.env.JWT_TOKEN}`
+    }
+  });
 
-async function analyzeBiomarkers() {
   try {
-    const response = await client.post('/api/prompt', {
-      patientId: 'pat-12345',
-      context: {
-        age: 62,
-        sex: 'male'
-      },
-      biomarkers: [
-        {
-          name: 'HbA1c',
-          value: 7.2,
-          unit: '%'
-        }
-      ],
-      instructions: 'Interpret these results'
+    // Upload document
+    const uploadResponse = await client.post('/api/documents/upload', 
+      { /* multipart form data */ }
+    );
+    const { documentId } = uploadResponse.data;
+
+    // Get analysis
+    const analysisResponse = await client.post('/api/documents/analyze', {
+      documentId,
+      analysisLevel: 'detailed'
     });
 
-    console.log('Analysis:', response.data.analysis);
+    console.log('Analysis:', analysisResponse.data.analysis);
+    return analysisResponse.data;
   } catch (error) {
-    console.error('API Error:', error.response?.data || error.message);
+    console.error('Error:', error.response?.data || error.message);
   }
 }
 
-analyzeBiomarkers();
+analyzePatientLabReport();
 ```
 
-### Python Example
+### Python Integration
 
 ```python
 import requests
 import json
 
-API_TOKEN = "your-api-token"
-BASE_URL = "https://api.mediscan.example.com"
+API_TOKEN = "your-jwt-token"
+BASE_URL = "http://localhost:3000"
 
 headers = {
     "Authorization": f"Bearer {API_TOKEN}",
-    "Content-Type": "application/json"
 }
 
-payload = {
-    "patientId": "pat-12345",
-    "context": {
-        "age": 62,
-        "sex": "male"
-    },
-    "biomarkers": [
-        {
-            "name": "HbA1c",
-            "value": 7.2,
-            "unit": "%"
-        }
-    ],
-    "instructions": "Provide interpretation and recommendations"
+# Upload document
+files = {'file': open('lab_report.pdf', 'rb')}
+data = {
+    'patientId': 'pat-12345',
+    'documentType': 'lab_report'
 }
 
-response = requests.post(
-    f"{BASE_URL}/api/prompt",
+upload_response = requests.post(
+    f"{BASE_URL}/api/documents/upload",
     headers=headers,
-    json=payload
+    files=files,
+    data=data
 )
 
-if response.status_code == 200:
-    print(json.dumps(response.json(), indent=2))
-else:
-    print(f"Error: {response.status_code} - {response.text}")
+document_id = upload_response.json()['documentId']
+
+# Get analysis
+analysis_response = requests.post(
+    f"{BASE_URL}/api/documents/analyze",
+    headers=headers,
+    json={
+        'documentId': document_id,
+        'analysisLevel': 'detailed'
+    }
+)
+
+print(json.dumps(analysis_response.json(), indent=2))
 ```
 
 ---
 
-## ⚠️ Limitations & Clinical Safety
+## ⚠️ Limitations & Safety
 
-### Important Disclaimers
+### Important Medical Disclaimers
 
-**This tool is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment.**
+🚨 **This tool is NOT a medical diagnosis system. It is for informational and educational purposes only.**
 
-All users must include the following disclaimer in UI and API responses:
+All API responses include this disclaimer:
 
-> "This tool provides informational insights based on biomarker data and AI analysis. **It is not a diagnosis.** Please consult with a licensed healthcare provider for medical decisions, diagnoses, or treatment plans."
+> "This analysis is AI-generated and is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult with a licensed healthcare provider for medical decisions. MediScan may contain errors or omissions."
 
-### Safety Guardrails
+### What MediScan Can Do ✅
 
-The backend implements multiple safety layers:
+- Extract and structure medical data from documents
+- Identify lab values and their reference ranges
+- Flag abnormal results
+- Summarize clinical findings
+- Suggest follow-up actions
+- Track trends over multiple documents
 
-#### 1. Output Filtering
+### What MediScan Cannot Do ❌
+
+- Provide medical diagnoses
+- Replace clinical judgment
+- Prescribe medications
+- Diagnose diseases
+- Provide emergency medical advice
+- Replace licensed healthcare providers
+
+### Safety Guardrails in Place
+
+#### 1. Automatic Output Filtering
 ```javascript
-function sanitizeClinicalOutput(aiOutput) {
-  const unsafePatterns = [
-    { pattern: /\bdiagnosed? with\b/gi, replacement: "may indicate" },
-    { pattern: /\byou have\b/gi, replacement: "your results suggest you may have" },
-    { pattern: /\bcertain(ly)?\b/gi, replacement: "may" },
-    { pattern: /\bprove(s|d)?\b/gi, replacement: "suggest" }
-  ];
-
-  let safe = aiOutput;
-  unsafePatterns.forEach(({ pattern, replacement }) => {
-    safe = safe.replace(pattern, replacement);
-  });
-
-  return safe;
-}
+// Remove definitive medical claims
+output = output.replace(/\byou have diabetes\b/gi, "results may indicate diabetes");
+output = output.replace(/\bdiagnosed? with\b/gi, "may have");
 ```
 
-#### 2. Mandatory Disclaimers
-```javascript
-function appendDisclaimers(analysis) {
-  const disclaimer = `
-⚠️ MEDICAL DISCLAIMER:
-This analysis is not a medical diagnosis. Always consult with a licensed healthcare provider 
-before making any medical decisions. AI-generated insights may contain errors.
+#### 2. Confidence Thresholds
+- Only surface high-confidence extractions (>0.85)
+- Flag low-confidence results for manual review
 
-🔍 VERIFICATION: Have your results reviewed by a qualified clinician.
-💊 MEDICATION: Do not change medications without healthcare provider approval.
-🏥 EMERGENCIES: Call 911 or go to the nearest emergency room for urgent concerns.
-  `;
+#### 3. Critical Value Alerts
+- Glucose < 50 mg/dL → Emergency alert
+- Potassium > 6.5 mEq/L → Critical alert
+- Hemoglobin < 7 g/dL → Critical alert
 
-  return {
-    ...analysis,
-    disclaimer
-  };
-}
-```
-
-#### 3. Confidence Thresholds
-```javascript
-// Only surface high-confidence results
-const MIN_CONFIDENCE = 0.7;
-
-if (analysisConfidence < MIN_CONFIDENCE) {
-  return {
-    warning: "Analysis confidence below threshold. Recommend clinical review.",
-    analysis: null
-  };
-}
-```
-
-### Clinical Governance
-
-1. **Audit All AI Outputs**
-   - Log every AI-generated recommendation
-   - Flag unusual or high-risk outputs for human review
-   - Maintain audit trail for regulatory compliance
-
-2. **Rule-Based Overrides**
-   - Critical values (e.g., glucose < 50 mg/dL, K+ > 6.5 mEq/L) trigger urgent alerts
-   - Conflicting AI recommendations are flagged for review
-   - Clinical validation required before surfacing critical findings
-
-3. **Human Verification Loop**
-   - Encourage clinician review of all AI insights
-   - Provide clear referral pathways to specialists
-   - Track outcomes to improve model accuracy
+#### 4. Mandatory Disclaimers
+Every response includes medical disclaimers and recommendations to consult healthcare providers.
 
 ### Known Limitations
 
-| Limitation | Implication | Mitigation |
-|-----------|------------|-----------|
-| **Single timepoint analysis** | No trend detection with one value | Require historical data when possible |
-| **Demographic bias in reference ranges** | Age/sex/ethnicity-specific ranges needed | Use population-specific references |
-| **Medication interactions not exhaustive** | Missed drug interactions possible | Recommend pharmacist review |
-| **AI probabilistic nature** | Occasional nonsensical output | Post-processing guardrails + human review |
-| **Data quality dependency** | Garbage in, garbage out | Validate all input before analysis |
+| Limitation | Impact | Workaround |
+|-----------|--------|-----------|
+| OCR accuracy varies by document quality | May miss text from poor scans | Provide high-quality documents |
+| Handwritten notes hard to read | May not extract handwritten data | Prefer typed/digital documents |
+| Context-dependent values | May misinterpret values without full context | Review extracted data |
+| Ambiguous lab names | May match wrong reference range | Manual verification recommended |
+| AI can hallucinate | May generate incorrect data | Always verify with original document |
+
+### Recommendations for Safe Use
+
+1. **Always Verify** — Compare AI-extracted data with original document
+2. **Clinical Review** — Have healthcare professionals review results
+3. **Full Context** — Don't rely on single documents; consider medical history
+4. **Emergency Care** — For urgent medical issues, call 911 or go to ER
+5. **Professional Advice** — Always consult licensed healthcare providers for medical decisions
 
 ---
 
-## 🚀 Next Steps & Enhancements
+## 🚀 Roadmap
 
-### Phase 1: MVP (Current)
-- [x] Basic API endpoints (prompt, upload, summary)
-- [x] CSV parsing and normalization
-- [x] AI provider integration
-- [x] Biomarker flagging logic
+### Phase 1: MVP ✅ (Current)
+- [x] Basic file upload (PDF, images)
+- [x] OCR text extraction
+- [x] AI-powered document analysis
+- [x] Lab value extraction
+- [x] Basic API endpoints
+- [x] HIPAA-compliant architecture
 
-### Phase 2: Core Features (Planned)
-- [ ] Persistent database (MongoDB/PostgreSQL)
-- [ ] User authentication & authorization (JWT, OAuth2)
-- [ ] Trend analysis & historical tracking
-- [ ] Standard reference range database
-- [ ] Drug-interaction lookup service
-- [ ] Clinical calculator integration (Framingham, ASCVD, etc.)
-- [ ] Comprehensive unit tests
-- [ ] API documentation (Swagger/OpenAPI)
+### Phase 2: Enhanced Features 🔄 (Next)
+- [ ] Multi-page document handling
+- [ ] Handwriting recognition
+- [ ] Medication interaction checking
+- [ ] Historical trend analysis
+- [ ] Batch document processing
+- [ ] User authentication system
+- [ ] Database persistence (MongoDB)
 
-### Phase 3: Advanced (Future)
-- [ ] Role-based access control (RBAC)
-- [ ] Multi-tenancy support
-- [ ] Real-time alert system
+### Phase 3: Advanced Analytics 📈 (Future)
+- [ ] Predictive health insights
+- [ ] Comparative analysis (vs. previous reports)
+- [ ] Risk scoring algorithms
 - [ ] Clinical knowledge base integration
-- [ ] Advanced visualization & reporting
-- [ ] Mobile app integration
-- [ ] HIPAA compliance certification
-- [ ] Audit trail & compliance reporting
+- [ ] Integration with EHR systems
+- [ ] Custom report generation
+- [ ] Mobile app support
 
-### Phase 4: Production Hardening
-- [ ] Rate limiting & DDoS protection
-- [ ] Advanced security & penetration testing
+### Phase 4: Production Hardening 🔐 (Long-term)
+- [ ] FDA compliance & validation
+- [ ] Clinical testing & validation
+- [ ] HIPAA certification
+- [ ] Penetration testing
 - [ ] Performance optimization
-- [ ] Global deployment & CDN
-- [ ] Disaster recovery & backup
-- [ ] Regulatory compliance (FDA, EHR integration)
-- [ ] Clinical validation studies
+- [ ] Global deployment
+- [ ] 24/7 support & monitoring
 
 ---
 
-## 📚 References & Resources
+## 📚 Resources
 
-### Clinical Standards
-- [LOINC (Lab Observation Identifiers Names and Codes)](https://loinc.org/)
-- [SNOMED CT (Clinical Terminology)](https://www.snomed.org/)
-- [ICD-10 Codes](https://www.cdc.gov/nchs/icd/icd10.htm)
-- [Framingham Risk Score](https://www.framinghamheartstudy.org/)
-- [ASCVD Risk Calculator](https://tools.acc.org/ascvd-risk-estimator-plus/)
+### Medical Document Standards
+- [HL7 FHIR](https://www.hl7.org/fhir/) — Healthcare data exchange standard
+- [LOINC](https://loinc.org/) — Lab test codes and names
+- [SNOMED CT](https://www.snomed.org/) — Clinical terminology
+- [ICD-10](https://www.cdc.gov/nchs/icd/) — Diagnosis codes
 
-### Technical References
-- [Express.js Documentation](https://expressjs.com/)
-- [Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
-- [HIPAA Compliance Guide](https://www.hhs.gov/hipaa/)
-- [OWASP API Security](https://owasp.org/www-project-api-security/)
-- [OpenAI API Docs](https://platform.openai.com/docs/)
-- [Anthropic Claude API](https://docs.anthropic.com/)
+### Technical Documentation
+- [Tesseract OCR](https://github.com/UB-Mannheim/tesseract) — Open-source OCR
+- [AWS Textract](https://aws.amazon.com/textract/) — Document extraction
+- [OpenAI API](https://platform.openai.com/docs/) — GPT-4 documentation
+- [Express.js](https://expressjs.com/) — Node.js framework
 
-### Related Technologies
-- **Biomarker Databases:** Wikidata, DrugBank, PubChem
-- **EHR Integration:** HL7 FHIR, CCD standards
-- **Data Visualization:** D3.js, Plotly, Chart.js
-- **Database:** MongoDB, PostgreSQL, DynamoDB
-- **Containerization:** Docker, Kubernetes
-- **Monitoring:** Prometheus, Grafana, DataDog
+### Security & Compliance
+- [HIPAA Compliance](https://www.hhs.gov/hipaa/) — US healthcare privacy law
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/) — Security best practices
+- [NIST Cybersecurity](https://www.nist.gov/cyberframework/) — Security framework
 
 ---
 
-## 🤝 Contributing
+## 💡 Contributing
 
-Contributions are welcome! To contribute:
+Contributions welcome! To contribute:
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit changes: `git commit -m "Add your feature"`
-4. Push to branch: `git push origin feature/your-feature`
-5. Open a Pull Request
+```bash
+# 1. Fork the repository
+git clone https://github.com/your-org/mediscan.git
+
+# 2. Create feature branch
+git checkout -b feature/your-feature
+
+# 3. Make changes & commit
+git commit -m "Add your feature"
+
+# 4. Push & create PR
+git push origin feature/your-feature
+```
 
 ### Code Standards
-- Use ESLint with provided `.eslintrc.js`
-- Run tests before submitting PR: `npm test`
-- Maintain >80% code coverage
-- Follow Express.js best practices
-- Add JSDoc comments for all functions
+- ESLint for code quality
+- Jest for testing (>80% coverage)
+- JSDoc comments for all functions
+- HIPAA compliance checks
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License**. See [LICENSE](LICENSE) file for details.
+MIT License - See [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support & Contact
+## 📞 Support
 
-For questions, issues, or contributions:
-
-- **GitHub Issues:** [Report bugs or request features](https://github.com/your-org/mediscan/issues)
-- **Email:** support@mediscan.example.com
-- **Documentation:** [Full docs](https://docs.mediscan.example.com/)
-- **Community:** [Discord/Slack channel]
+- **Issues:** [GitHub Issues](https://github.com/your-org/mediscan/issues)
+- **Email:** support@mediscan.io
+- **Docs:** [docs.mediscan.io](https://docs.mediscan.io)
 
 ---
 
-## 🙏 Acknowledgments
-
-- Clinical advisors and SMEs for reference ranges and validation
-- Open-source community (Express, Node.js ecosystem)
-- Healthcare data standards organizations (LOINC, SNOMED, HL7)
-
----
-
+**Status:** Active Development  
 **Last Updated:** January 2026  
-**Maintainer:** [Your Team Name]  
-**Status:** Active Development
+**Maintainers:** MediScan Team
 
 ---
 
-For biology-specific references and clinical thresholds, coordinate with clinical SMEs and maintain a curated knowledge base that both backend and frontend can query.
+## Disclaimer
+
+MediScan is a tool for document analysis and information structuring. It is NOT medical software and does NOT provide medical diagnoses or clinical advice. Always consult qualified healthcare professionals for medical decisions.
 
