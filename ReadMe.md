@@ -11,7 +11,7 @@ User Uploads Medical Document (PDF/Image)
             ↓
     Validate & Secure File
             ↓
-    Extract Text (OCR)
+    Extract Text (pdf-parser)
             ↓
     Send to AI Model for Analysis
             ↓
@@ -21,40 +21,6 @@ User Uploads Medical Document (PDF/Image)
             ↓
     Store Securely
 ```
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────┐
-│  Frontend / Client                      │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────┐
-│  API Routes                             │
-│  - POST /api/documents/upload           │
-│  - POST /api/documents/analyze          │
-│  - GET /api/documents/:id               │
-└────────────────┬────────────────────────┘
-                 │
-        ┌────────┴────────┐
-        ↓                 ↓
-┌───────────────┐  ┌──────────────┐
-│  OCR Service  │  │  AI Service  │
-│  (Tesseract)  │  │  (Gemini)    │
-└───────┬───────┘  └──────┬───────┘
-        │                 │
-        └────────┬────────┘
-                 ↓
-        ┌────────────────┐
-        │ File Storage   │
-        │ & Encryption   │
-        └────────────────┘
-```
-
----
 
 ## 🤖 AI Model: Google Gemini
 
@@ -110,10 +76,6 @@ const response = await model.generateContent({
 # Install dependencies
 npm install
 
-# Configure environment
-cp .env.example .env
-# Add GEMINI_API_KEY to .env
-
 # Start server
 npm run dev
 
@@ -126,18 +88,10 @@ npm run dev
 
 **Upload Document:**
 ```bash
-curl -X POST http://localhost:3000/api/documents/upload \
+curl -X POST http://localhost:3000/api/upload \
   -H "Authorization: Bearer token" \
   -F "file=@lab_report.pdf" \
   -F "patientId=pat-123"
-```
-
-**Get Analysis:**
-```bash
-curl -X POST http://localhost:3000/api/documents/analyze \
-  -H "Authorization: Bearer token" \
-  -H "Content-Type: application/json" \
-  -d '{"documentId": "doc-abc123"}'
 ```
 
 **Response:**
