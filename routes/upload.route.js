@@ -32,7 +32,7 @@ async function getBestAvailableModel(genAI) {
       console.log(`✅ Using Gemini model: ${modelName}`);
       return model;
     } catch (err) {
-      console.log(`❌ Model failed: ${modelName} — ${err.message}`);
+      console.log(`❌ Model failed: ${modelName}`);
     }
   }
 
