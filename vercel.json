@@ -2,21 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["dist/**"] }
+      "src": "app.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
       "dest": "app.js"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/app.js"
     }
   ]
 }
