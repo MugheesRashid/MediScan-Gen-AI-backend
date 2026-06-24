@@ -14,76 +14,41 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // -------------------------
 // MODEL FALLBACK SYSTEM
 // -------------------------
-async function getBestAvailableModel(genAI) {
-  const MODEL_PRIORITY = [
-    "gemini-2.5-flash", // 🔥 prioritize working model
-    "gemini-2.5-flash-lite",
-    "gemini-2.0-flash",
-    "gemini-2.5-pro", // ❌ keep last (likely to fail)
-  ];
+const MODEL_FALLBACK_LIST = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-2.5-pro",
+  "gemini-2.5-flash-lite-preview",
+  "gemini-2.0-flash-lite",
+];
 
-  for (const modelName of MODEL_PRIORITY) {
+/**
+ * Reusable helper to generate content with fallback logic
+ */
+async function generateWithFallback(payload) {
+  let lastError = null;
+
+  for (const modelName of MODEL_FALLBACK_LIST) {
     try {
+      console.log(`Attempting generation with: ${modelName}`);
       const model = genAI.getGenerativeModel({ model: modelName });
-      await model.generateContent("ping");
-      console.log(`✅ Using Gemini model: ${modelName}`);
-      return model;
-    } catch (err) {
-      console.log(`❌ Model failed: ${modelName}`);
+      const result = await model.generateContent(payload);
+
+      const response = await result.response;
+      const text = response.text();
+
+      if (!text) throw new Error("Empty response from model");
+
+      console.log(`✅ Successfully generated with: ${modelName}`);
+      return text;
+    } catch (error) {
+      console.warn(`Model ${modelName} failed:`, error.message);
+      lastError = error;
     }
   }
 
-  throw new Error("No Gemini models available");
-}
-
-// -------------------------
-// LAZY MODEL LOADER (FIXED)
-// -------------------------
-let modelPromise = null;
-
-async function getModel() {
-  if (!modelPromise) {
-    console.log("⚡ Initializing Gemini model...");
-    modelPromise = getBestAvailableModel(genAI);
-  }
-  return modelPromise;
-}
-
-// -------------------------
-// RETRY + FALLBACK HANDLER
-// -------------------------
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function safeGenerateContent(payload, maxRetries = 3) {
-  let attempt = 0;
-  let model = await getModel();
-
-  while (attempt < maxRetries) {
-    try {
-      return await model.generateContent(payload);
-    } catch (err) {
-      const retryable = [429, 500, 503];
-      console.log(`⚠️ Gemini Error (Attempt ${attempt + 1}):`, err.status);
-
-      if (retryable.includes(err.status)) {
-        attempt++;
-        await wait(1000 * attempt);
-        continue;
-      }
-
-      throw err;
-    }
-  }
-
-  // 🔄 Switch model after retries fail
-  console.log("🔄 Switching Gemini model...");
-
-  modelPromise = getBestAvailableModel(genAI);
-  const newModel = await modelPromise;
-
-  return await newModel.generateContent(payload);
+  throw new Error(`All models failed. Last error: ${lastError?.message}`);
 }
 
 // -------------------------
@@ -127,8 +92,7 @@ router.post("/pdf", upload.single("pdf"), async (req, res) => {
     const extractedText = await pdf.getText();
     const payload = prompt + extractedText.text;
 
-    const response = await safeGenerateContent(payload);
-    const geminiText = response.response.text();
+    const geminiText = await generateWithFallback(payload);
 
     fs.unlinkSync(req.file.path);
 
@@ -179,8 +143,7 @@ router.post("/image", upload.single("image"), async (req, res) => {
       ],
     };
 
-    const response = await safeGenerateContent(payload);
-    const geminiText = response.response.text();
+    const geminiText = await generateWithFallback(payload);
 
     fs.unlinkSync(req.file.path);
 
